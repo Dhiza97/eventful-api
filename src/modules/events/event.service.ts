@@ -1,17 +1,29 @@
+import Event from "./event.model";
 import redis from "../../config/redis";
 
-const CACHE_KEY = "events:all";
+const ALL_EVENTS_CACHE = "events:all";
+
+export const createEvent = async (payload: any) => {
+  const event = await Event.create(payload);
+
+  // Invalidate cache
+  await redis.del(ALL_EVENTS_CACHE);
+
+  return event;
+};
 
 export const getAllEvents = async () => {
-  const cachedEvents = await redis.get(CACHE_KEY);
+    const cached = await redis.get(ALL_EVENTS_CACHE);
+    if (cached) {
+        return JSON.parse(cached);
+    }
 
-  if (cachedEvents) {
-    return JSON.parse(cachedEvents);
-  }
+    const events = await Event.find().populate('creator', 'name');
+    await redis.set(ALL_EVENTS_CACHE, JSON.stringify(events), "EX", 300);
 
-  const events = await EventModel.find();
-
-  await redis.set(CACHE_KEY, JSON.stringify(events), "EX", 300); // 5 mins
-
-  return events;
+    return events;
 };
+
+export const getCreatorEvents = async (creatorId: string) => {
+    return Event.find({ creator: creatorId})
+}
