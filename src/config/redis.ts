@@ -1,19 +1,20 @@
 import Redis from "ioredis";
 
-let redis: Redis | null = null;
+const redis = new Redis({
+  host: "127.0.0.1",
+  port: 6379,
+  retryStrategy(times) {
+    if (times > 5) return null;
+    return 1000;
+  },
+});
 
-try {
-  redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379");
+redis.on("connect", () => {
+  console.log("Redis connected");
+});
 
-  redis.on("connect", () => {
-    console.log("Redis connected");
-  });
-
-  redis.on("error", (err) => {
-    console.error("Redis error:", err.message);
-  });
-} catch (err) {
-  console.warn("Redis not available, continuing without cache");
-}
+redis.on("error", (err) => {
+  console.warn("Redis error:", err.message);
+});
 
 export default redis;

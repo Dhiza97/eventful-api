@@ -6,6 +6,7 @@ import authRoutes from "./modules/auth/auth.routes";
 import eventRoutes from "./modules/events/event.routes";
 import ticketRoutes from "./modules/tickets/ticket.routes";
 import paymentRoutes from "./modules/payments/payment.routes";
+import scanRoutes from "./modules/tickets/scan.routes";
 
 // Connect to the database
 connectDatabase();
@@ -20,6 +21,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/tickets", scanRoutes);
 
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
