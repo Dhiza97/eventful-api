@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { connectDatabase } from "./config/db";
@@ -29,6 +29,14 @@ app.use("/api/analytics", analyticsRoutes);
 
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
+});
+
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err);
+
+  res.status(500).json({
+    message: err.message || "Internal Server Error",
+  });
 });
 
 export default app;

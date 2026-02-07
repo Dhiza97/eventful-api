@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { buyTicket } from "./ticket.controller";
+import { buyTicket, getMyTickets } from "./ticket.controller";
 import { authenticate } from "../../middlewares/auth.middleware";
 import { authorize } from "../../middlewares/role.middleware";
 
 const router = Router();
 
 router.post("/buy", authenticate, authorize("eventee"), buyTicket);
+router.get("/my", authenticate, authorize("eventee"), getMyTickets);
 
 export default router;
