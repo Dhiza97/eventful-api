@@ -7,19 +7,34 @@ export const createTicketAfterPayment = async (
   eventId: string,
   reference: string
 ) => {
-  const qrData = `${eventId}:${userId}:${reference}`;
-  const qrCode = await generateQRCode(qrData);
-
-  const ticket = await Ticket.create({
+  // 1. Create ticket ID manually (without saving)
+  const ticket = new Ticket({
     user: userId,
     event: eventId,
-    qrCode,
+    scannedAt: null
   });
 
+  // 2. Generate QR using ticket ID
+  const { qrToken, qrImage } = await generateQRCode({
+    ticketId: ticket._id.toString(),
+    eventId,
+    userId
+  });
+
+  // 3. Attach qrToken BEFORE saving
+  ticket.qrToken = qrToken;
+
+  // 4. Save ticket (now validation passes)
+  await ticket.save();
+
+  // 5. Mark payment successful
   await Payment.findOneAndUpdate(
     { reference },
     { status: "success" }
   );
 
-  return ticket;
+  return {
+    ticketId: ticket.id,
+    qrCode: qrImage
+  };
 };
