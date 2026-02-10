@@ -17,6 +17,7 @@ const app = express();
 
 app.use(cors());
 app.use(helmet());
+app.use("/api/payments/webhook", paymentRoutes);
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);

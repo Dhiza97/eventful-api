@@ -7,21 +7,26 @@ export const initializePayment = async (
   amount: number,
   reference: string
 ) => {
-  const response = await axios.post(
-    `${PAYSTACK_BASE_URL}/transaction/initialize`,
-    {
-      email,
-      amount: amount * 100,
-      reference,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+  try {
+    const response = await axios.post(
+      "https://api.paystack.co/transaction/initialize",
+      {
+        email,
+        amount: amount * 100,
+        reference,
       },
-    }
-  );
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        },
+      }
+    );
 
-  return response.data.data;
+    return response.data.data;
+  } catch (error: any) {
+    console.error("PAYSTACK ERROR:", error.response?.data || error.message);
+    throw error;
+  }
 };
 
 export const verifyPayment = async (reference: string) => {
