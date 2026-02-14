@@ -11,5 +11,7 @@ router.get("/", controller.getAllEvents);
 router.post("/", authenticate, authorize("creator"), controller.createEvent);
 router.get("/mine", authenticate, authorize("creator"), controller.getMyEvents);
 router.get("/:id", controller.getEventById);
+router.patch("/:id", authenticate, authorize("creator"), controller.updateEvent);
+router.delete("/:id", authenticate, authorize("creator"), controller.deleteEvent);
 
 export default router;

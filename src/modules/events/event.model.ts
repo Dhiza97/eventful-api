@@ -9,6 +9,7 @@ export interface IEvent extends Document {
     capacity: number;
     creator: Types.ObjectId;
     reminder: number[];
+    image: string;
 }
 
 const eventSchema = new Schema<IEvent>(
@@ -21,6 +22,7 @@ const eventSchema = new Schema<IEvent>(
         capacity: { type: Number, required: true },
         creator: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         reminder: { type: [Number], default: [] },
+        image: { type: String, default: "" },
     },
     { timestamps: true
     }

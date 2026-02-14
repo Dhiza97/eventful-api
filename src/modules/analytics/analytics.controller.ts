@@ -39,28 +39,67 @@ export const creatorAnalytics = async (
 
     const eventIds = events.map(e => e._id);
 
-    const [totalTickets, totalRevenue] = await Promise.all([
-      Ticket.countDocuments({ event: { $in: eventIds } }),
-      Payment.aggregate([
-        { $match: { event: { $in: eventIds }, status: "success" } },
-        { $group: { _id: null, total: { $sum: "$amount" } } }
-      ])
-    ]);
+    const tickets = await Ticket.find({ event: { $in: eventIds } });
+
+    const payments = await Payment.find({
+      event: { $in: eventIds },
+      status: "success",
+    });
+
+    const totalRevenue = payments.reduce(
+      (sum, p) => sum + p.amount,
+      0
+    );
+
+    const revenuePerEvent = events.map(event => {
+      const eventRevenue = payments
+        .filter(p => p.event.toString() === event._id.toString())
+        .reduce((sum, p) => sum + p.amount, 0);
+
+      return {
+        title: event.title,
+        revenue: eventRevenue,
+      };
+    });
+
+    const ticketsPerEvent = events.map(event => {
+      const count = tickets.filter(
+        t => t.event.toString() === event._id.toString()
+      ).length;
+
+      return {
+        title: event.title,
+        ticketsSold: count,
+      };
+    });
+
+    const totalTickets = tickets.length;
+
+    const totalCapacity = events.reduce(
+      (sum, e) => sum + e.capacity,
+      0
+    );
+
+    const attendanceRate =
+      totalCapacity > 0
+        ? (totalTickets / totalCapacity) * 100
+        : 0;
 
     res.json({
       success: true,
       data: {
         totalEvents: events.length,
-        totalTicketsSold: totalTickets,
-        totalRevenue: totalRevenue[0]?.total || 0
-      }
+        ticketsSold: totalTickets,
+        revenue: totalRevenue,
+        attendanceRate,
+        revenuePerEvent,
+        ticketsPerEvent,
+      },
     });
-
   } catch (error) {
-    console.error(error);
     res.status(500).json({
       success: false,
-      message: "Failed to fetch creator analytics"
+      message: "Failed to fetch creator analytics",
     });
   }
 };
