@@ -3,6 +3,7 @@ import Redis from "ioredis";
 const redisUrl = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
 const redis = new Redis(redisUrl, {
+  enableOfflineQueue: false,
   connectTimeout: 10000, 
   retryStrategy(times) {
     if (times > 10) {
