@@ -1,5 +1,4 @@
 import Ticket from "./ticket.model";
-import Payment from "../payments/payment.model";
 import { generateQRCode } from "./qr.service";
 
 export const createTicketAfterPayment = async (
@@ -7,34 +6,28 @@ export const createTicketAfterPayment = async (
   eventId: string,
   reference: string
 ) => {
-  // 1. Create ticket ID manually (without saving)
+  const existing = await Ticket.findOne({ paymentReference: reference });
+  if (existing) return existing;
+
+  // Create ticket first (without qrToken validation temporarily)
   const ticket = new Ticket({
     user: userId,
     event: eventId,
-    scannedAt: null
+    paymentReference: reference,
+    qrToken: "temp",
+    status: "paid",
   });
 
-  // 2. Generate QR using ticket ID
-  const { qrToken, qrImage } = await generateQRCode({
-    ticketId: ticket._id.toString(),
-    eventId,
-    userId
-  });
-
-  // 3. Attach qrToken BEFORE saving
-  ticket.qrToken = qrToken;
-
-  // 4. Save ticket (now validation passes)
   await ticket.save();
 
-  // 5. Mark payment successful
-  await Payment.findOneAndUpdate(
-    { reference },
-    { status: "success" }
-  );
+  const { qrToken } = await generateQRCode({
+    ticketId: ticket._id.toString(),
+    eventId,
+    userId,
+  });
 
-  return {
-    ticketId: ticket.id,
-    qrCode: qrImage
-  };
+  ticket.qrToken = qrToken;
+  await ticket.save();
+
+  return ticket;
 };

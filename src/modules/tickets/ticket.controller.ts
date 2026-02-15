@@ -23,7 +23,6 @@ export const buyTicket = async (req: AuthRequest, res: Response) => {
 
   const reference = crypto.randomUUID();
 
-  // Create pending payment (amount comes from event)
   await Payment.create({
     user: req.user.id,
     event: event._id,
