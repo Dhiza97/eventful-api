@@ -6,6 +6,7 @@ import Payment from "../payments/payment.model";
 import { initializePayment } from "../payments/paystack.service";
 import User from "../users/user.model";
 import Ticket from "./ticket.model";
+import { Types } from "mongoose";
 
 export const buyTicket = async (req: AuthRequest, res: Response) => {
   const { eventId } = req.body;
@@ -44,11 +45,14 @@ export const buyTicket = async (req: AuthRequest, res: Response) => {
   });
 };
 
-export const getMyTickets = async (req: Request, res: Response) => {
+export const getMyTickets = async (req: AuthRequest, res: Response) => {
+  console.log("Decoded user:", req.user);
   const userId = req.user!.id;
 
-  const tickets = await Ticket.find({ user: userId })
-    .populate("event", "title date location");
+  const tickets = await Ticket.find({ user: new Types.ObjectId(userId) })
+  .populate("event", "title date location");
+
+  console.log("Tickets found:", tickets.length);
 
   res.status(200).json({
     success: true,
