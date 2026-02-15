@@ -1,11 +1,15 @@
 import Redis from "ioredis";
 
-const redis = new Redis({
-  host: "127.0.0.1",
-  port: 6379,
+const redisUrl = process.env.REDIS_URL || "redis://127.0.0.1:6379";
+
+const redis = new Redis(redisUrl, {
+  connectTimeout: 10000, 
   retryStrategy(times) {
-    if (times > 5) return null;
-    return 1000;
+    if (times > 10) {
+      console.error("Redis reconnection failed after 10 attempts.");
+      return null;
+    }
+    return Math.min(times * 100, 3000);
   },
 });
 
