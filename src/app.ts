@@ -35,7 +35,7 @@ app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-app.get("/health", (_req, res) => {
+app.get("/", (_req, res) => {
   res.send("Backend is running")
 });
 
