@@ -35,10 +35,6 @@ app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-app.get("/", (_req, res) => {
-  res.send("Backend is running")
-});
-
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err);
 
