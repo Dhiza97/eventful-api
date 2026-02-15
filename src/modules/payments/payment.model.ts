@@ -6,6 +6,7 @@ export interface IPayment extends Document {
   amount: number;
   reference: string;
   status: "pending" | "success" | "failed";
+  paidAt?: Date;
 }
 
 const paymentSchema = new Schema<IPayment>(
@@ -19,6 +20,7 @@ const paymentSchema = new Schema<IPayment>(
       enum: ["pending", "success", "failed"],
       default: "pending",
     },
+    paidAt: { type: Date },
   },
   { timestamps: true }
 );
